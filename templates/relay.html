@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{{name}}
+
+<br>
+<span>
+    {{writePerSecond}}
+</span><br>
+
+<span>
+    {{readPerSecond}}
+</span>
+
+
+
+<br>
+<span><span id="written">{{writeTotal}}</span> GB</span>
+<br>
+<span><span id="read">{{readTotal}}</span>GB</span>
+
+<script>
+var writeTotal = parseFloat(`{{writeTotal}}`)
+var readTotal = parseFloat(`{{readTotal}}`)
+
+var writePerSecond = parseFloat(`{{writePerSecond}}`)/100
+var readperSecond = parseFloat(`{{readPerSecond}}`)/100
+
+
+function increment(){
+    writeTotal += writePerSecond
+    readTotal += readperSecond
+    document.getElementById("written").innerText = Math.round(writeTotal/1000/10)/100000
+    document.getElementById("read").innerText = Math.round(readTotal/1000/10)/100000
+}
+setInterval(increment, 10)
+</script>
+
+{% endblock %}

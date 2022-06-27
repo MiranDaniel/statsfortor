@@ -1,0 +1,35 @@
+@media only screen and (min-width: 600px) {
+
+    html {
+        background-image: url("/static/bg-desktop.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+
+    html {
+        background-image: url("/static/bg-mobile.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+
+    .footer {
+        background-image: url("/static/footer-desktop.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+
+    .footer {
+        background-image: url("/static/footer-mobile.svg");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
