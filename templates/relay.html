@@ -4,7 +4,17 @@
 <header class="flex flex-col justify-center content-center items-center text-white gap-2">
     <h2 class="text-7xl">{{name}}</h2>
     <h3 class="text-xl text-white/75">{{fingerprint}}</h3>
-    <h4 class="text-2xl text-white">{{type}}</h4>
+    <div class="flex flex-row justify-center items-center content-center w-1/3">
+        {% if running %}
+        <hr class="border-green-500 border-4 w-full">
+        <span class="mx-2 text-xl text-green-500 font-bold">Online</span>
+        <hr class="border-green-500 border-4 w-full">
+        {% else %}
+        <hr class="border-red-500 border-4 w-full">
+        <span class="mx-2 text-xl text-red-500 font-bold">Offline</span>
+        <hr class="border-red-500 border-4 w-full">
+        {% endif %}
+    </div>
 </header>
 <br class="my-28">
 <div class="flex flex-col justify-center items-center content-center text-tdpurple">
@@ -41,11 +51,32 @@
                     </div>
                 </div>
             </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Origin</h4>
+                <div>
+                    <h5 class="font-semibold">Country</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span class="flex flex-row text-md align-middle items-center gap-x-3"><img src="/static/flags/4x3/{{country}}.svg" class="h-4" alt="{{country}}">{{country_name}}</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">AS Number</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <pre><code>{{as_number}}</code></pre>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">AS Name</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{as_name}}</span>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="flex flex-col gap-5 w-1/2">
             <div class="border-tpurple p-2 border-2 rounded-xl">
                 <h4 class="text-2xl">Flags</h4>
-                <ul class="flex flex-row gap-5 text-lg mx-5">
+                <ul class="flex flex-row flex-wrap gap-x-5 text-lg mx-5">
                     {% for i in flags_l %}
                     <li>
                         <i class="ti ti-{{i}}"></i>
@@ -58,15 +89,26 @@
                 <h4 class="text-2xl">Contact</h4>
                 <p class="text-md">{{contact}}</p>
             </div>
-            <div class="border-tpurple p-2 border-2 rounded-xl">
-                <h4 class="text-2xl">Origin</h4>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Bandwidth</h4>
                 <div>
-                    <h5 class="font-semibold">Country</h5>
+                    <h5 class="font-semibold">Advertised bandwidth</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
-                        <span class="flex flex-row text-md align-middle items-center gap-x-3"><img src="/static/flags/4x3/{{country}}.svg" class="h-4" alt="{{country}}">{{country_name}}</span>
+                        <li>{{writePerSecond/10}} ⬆️</li>
                     </ul>
                 </div>
-
+                <div>
+                    <h5 class="font-semibold">AS Number</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <pre><code>{{as_number}}</code></pre>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">AS Name</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{as_name}}</span>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
