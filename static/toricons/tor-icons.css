@@ -1,0 +1,112 @@
+@font-face {
+    font-family: "tor-icons";
+    src: url("./tor-icons.eot?f04929c1d49aa0dfea8d955838e8ead0?#iefix") format("embedded-opentype"),
+url("./tor-icons.woff2?f04929c1d49aa0dfea8d955838e8ead0") format("woff2"),
+url("./tor-icons.woff?f04929c1d49aa0dfea8d955838e8ead0") format("woff"),
+url("./tor-icons.ttf?f04929c1d49aa0dfea8d955838e8ead0") format("truetype"),
+url("./tor-icons.svg?f04929c1d49aa0dfea8d955838e8ead0#tor-icons") format("svg");
+}
+
+.ti:before {
+    font-family: tor-icons !important;
+    font-style: normal;
+    font-weight: normal !important;
+    vertical-align: top;
+}
+
+.ti-authority:before {
+    content: "\f101";
+}
+.ti-badexit:before {
+    content: "\f102";
+}
+.ti-bridge:before {
+    content: "\f103";
+}
+.ti-country:before {
+    content: "\f104";
+}
+.ti-directory:before {
+    content: "\f105";
+}
+.ti-exit:before {
+    content: "\f106";
+}
+.ti-experimental:before {
+    content: "\f107";
+}
+.ti-fallbackdir:before {
+    content: "\f108";
+}
+.ti-fast:before {
+    content: "\f109";
+}
+.ti-fingerprint:before {
+    content: "\f10a";
+}
+.ti-guard:before {
+    content: "\f10b";
+}
+.ti-hibernating:before {
+    content: "\f10c";
+}
+.ti-hsdir:before {
+    content: "\f10d";
+}
+.ti-ipv4:before {
+    content: "\f10e";
+}
+.ti-ipv6exit:before {
+    content: "\f10f";
+}
+.ti-ipv6:before {
+    content: "\f110";
+}
+.ti-noedconsensus:before {
+    content: "\f111";
+}
+.ti-notrecommended:before {
+    content: "\f112";
+}
+.ti-onion-alt:before {
+    content: "\f113";
+}
+.ti-onion:before {
+    content: "\f114";
+}
+.ti-outdated:before {
+    content: "\f115";
+}
+.ti-reachableipv4:before {
+    content: "\f116";
+}
+.ti-reachableipv6:before {
+    content: "\f117";
+}
+.ti-relay:before {
+    content: "\f118";
+}
+.ti-running:before {
+    content: "\f119";
+}
+.ti-stable:before {
+    content: "\f11a";
+}
+.ti-tshirt:before {
+    content: "\f11b";
+}
+.ti-unmeasured:before {
+    content: "\f11c";
+}
+.ti-unreachableipv4:before {
+    content: "\f11d";
+}
+.ti-unreachableipv6:before {
+    content: "\f11e";
+}
+.ti-v2dir:before {
+    content: "\f11f";
+}
+.ti-valid:before {
+    content: "\f120";
+}

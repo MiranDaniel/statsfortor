@@ -42,7 +42,14 @@ def relay(request, name=""):
             "type_raw": "relay",
             "name": details["relays"][0]["nickname"],
             "fingerprint": details["relays"][0]["fingerprint"],
-            "or_addresses": details["relays"][0]["or_addresses"]
+            "or_addresses": details["relays"][0]["or_addresses"],
+            "contact": details["relays"][0]["contact"],
+            "dir_address": details["relays"][0].get("dir_address"),
+            "exit_addresses": details["relays"][0].get("exit_addresses"),
+            "flags": details["relays"][0].get("flags"),
+            "flags_l": [i.lower() for i in details["relays"][0].get("flags")],
+            "country": details["relays"][0].get("country"),
+            "country_name": details["relays"][0].get("country_name")
         }
         
         ctx["type"] = "Middle"

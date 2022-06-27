@@ -1,7 +1,7 @@
 <div class="m-2 text-white font-light shadow-white">
     {% if not index %}
     <div class="flex flex-row justify-between content-center items-center">
-        <h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1>
+        <a href="/"><h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1></a>
         <a href="https://metrics.torproject.org/rs.html#details/{{fingerprint}}"><h2 class="text-lg drop-shadow font-medium border p-2 rounded-xl hover:bg-white hover:text-tdpurple">View {{name}} on Metrics</h2></a>
     </div>
     {% else %}
