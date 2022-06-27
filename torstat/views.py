@@ -5,6 +5,9 @@ import requests
 from django import forms
 from django.http import HttpResponseNotFound
 from .forms import Search
+from binascii import a2b_hex
+from hashlib import sha1
+import socket
 
 
 def index(request, name=""):
@@ -24,55 +27,97 @@ def relayRaw(request, name=""):
 
 
 def relay(request, name=""):
-    # if len(name) != 40:
-    #    return HttpResponse(status=404)
+    print("CALL")
+    def bridgeHandler(name, details):
+        ctx = {
+            "type_raw": "bridge",
+            "name": details["bridges"][0]["nickname"],
+            "fingerprint": details["bridges"][0]["hashed_fingerprint"],
+            "type": f"{', '.join(details['bridges'][0]['transports'])} bridge"
+        }
+        return render(request, "../templates/relay.html", context=ctx)
 
-    ctx = {}
+    def relayHandler(name, details, bandwidth):
+        ctx = {
+            "type_raw": "relay",
+            "name": details["relays"][0]["nickname"],
+            "fingerprint": details["relays"][0]["fingerprint"],
+            "or_addresses": details["relays"][0]["or_addresses"]
+        }
+        
+        ctx["type"] = "Middle"
+        if "Exit" in details["relays"][0]["flags"]:
+            ctx["type"] = "Exit"
+        else:
+            if "Guard" in details["relays"][0]["or_addresses"]:
+                ctx["type"] = "Guard/Middle"
+            else:
+                ctx["type"] = "Middle"
+
+        if "Authority" in details["relays"][0]["flags"]:
+            ctx["type"] = "Authority"
+
+        ctx["writes"] = bandwidth["relays"][0]["write_history"]["6_months"]["values"]
+        ctx["reads"] = bandwidth["relays"][0]["read_history"]["6_months"]["values"]
+
+        ctx["write_factor"] = bandwidth["relays"][0]["write_history"]["6_months"]["factor"]
+        ctx["read_factor"] = bandwidth["relays"][0]["read_history"]["6_months"]["factor"]
+
+        ctx["write_count"] = bandwidth["relays"][0]["write_history"]["6_months"]["count"]
+        ctx["read_count"] = bandwidth["relays"][0]["read_history"]["6_months"]["count"]
+
+        ctx["writeTotal"] = 0
+        ctx["readTotal"] = 0
+
+        for i in ctx["writes"]:
+            ctx["writeTotal"] += i*ctx["write_factor"] * \
+                bandwidth["relays"][0]["write_history"]["6_months"]["interval"]
+
+        for i in ctx["reads"]:
+            ctx["readTotal"] += i*ctx["read_factor"] * \
+                bandwidth["relays"][0]["read_history"]["6_months"]["interval"]
+
+        ctx["writePerSecond"] = ctx["writes"][-1]*ctx["write_factor"]
+        ctx["readPerSecond"] = ctx["reads"][-1]*ctx["read_factor"]
+
+        return render(request, "../templates/relay.html", context=ctx)
+
+    prefix = ""
+    if "." in name:
+        try:
+            socket.inet_aton(name)
+        except socket.error:
+            prefix = "host_name:"
+    
 
     def _getDetails(name):
+        print("DETAILS")
         r = requests.get(
-            f"https://onionoo.torproject.org/details?search={name}")
+            f"https://onionoo.torproject.org/details?search={prefix}{name}")
         return r.json()
 
     def _getBandwidth(name):
         r = requests.get(
-            f"https://onionoo.torproject.org/bandwidth?search={name}")
+            f"https://onionoo.torproject.org/bandwidth?search={prefix}{name}")
         return r.json()
 
     details = _getDetails(name)
-    bandwidth = _getBandwidth(name)
 
-    if len(details["relays"]) == 0:
-        return error404(request, relay=name)
+    def check(details):
+        if len(details["relays"]) == 0 and len(details["bridges"]) == 0:
+            return error404(request, relay=name), False
 
-    ctx["name"] = details["relays"][0]["nickname"]
-    ctx["fingerprint"] = details["relays"][0]["fingerprint"]
-    ctx["or_addresses"] = details["relays"][0]["or_addresses"]
+        if len(details["relays"]) != 0:
+            bandwidth = _getBandwidth(name)
+            return relayHandler(name, details, bandwidth), True
+        if len(details["bridges"]) != 0:
+            return bridgeHandler(name, details), True
 
-    ctx["writes"] = bandwidth["relays"][0]["write_history"]["6_months"]["values"]
-    ctx["reads"] = bandwidth["relays"][0]["read_history"]["6_months"]["values"]
-
-    ctx["write_factor"] = bandwidth["relays"][0]["write_history"]["6_months"]["factor"]
-    ctx["read_factor"] = bandwidth["relays"][0]["read_history"]["6_months"]["factor"]
-
-    ctx["write_count"] = bandwidth["relays"][0]["write_history"]["6_months"]["count"]
-    ctx["read_count"] = bandwidth["relays"][0]["read_history"]["6_months"]["count"]
-
-    ctx["writeTotal"] = 0
-    ctx["readTotal"] = 0
-
-    for i in ctx["writes"]:
-        ctx["writeTotal"] += i*ctx["write_factor"] * \
-            bandwidth["relays"][0]["write_history"]["6_months"]["interval"]
-
-    for i in ctx["reads"]:
-        ctx["readTotal"] += i*ctx["read_factor"] * \
-            bandwidth["relays"][0]["read_history"]["6_months"]["interval"]
-
-    ctx["writePerSecond"] = ctx["writes"][-1]*ctx["write_factor"]
-    ctx["readPerSecond"] = ctx["reads"][-1]*ctx["read_factor"]
-
-    return render(request, "../templates/relay.html", context=ctx)
+    res = check(details)
+    if res[-1] != True:
+        name = sha1(a2b_hex(name)).hexdigest().upper()
+        return redirect(f"/relay/{name}")
+    return res[0]
 
 
 def error404(request, e=None, relay=None):

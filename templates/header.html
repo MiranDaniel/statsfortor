@@ -1,11 +1,14 @@
-<div class="m-2 text-white font-light">
+<div class="m-2 text-white font-light shadow-white">
     {% if not index %}
-    <h1 class="text-5xl">StatsForTor</h1>
+    <div class="flex flex-row justify-between content-center items-center">
+        <h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1>
+        <a href="https://metrics.torproject.org/rs.html#details/{{fingerprint}}"><h2 class="text-lg drop-shadow font-medium border p-2 rounded-xl hover:bg-white hover:text-tdpurple">View {{name}} on Metrics</h2></a>
+    </div>
     {% else %}
 
     <div class="flex flex-col justify-center content-center items-center p-24">
-        <h1 class="text-9xl">StatsForTor</h1>
-        <h2 class="text-3xl">Advanced relay statistics for the Tor network</h2>
+        <h1 class="text-9xl drop-shadow">StatsForTor</h1>
+        <h2 class="text-3xl drop-shadow">Advanced relay statistics for the Tor network</h2>
     </div>
 
     {% endif %}

@@ -1,23 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 
-{{name}}
+<div class="flex flex-col justify-center content-center items-center text-white gap-2">
 
-<br>
-<span>
-    {{writePerSecond}}
-</span><br>
-
-<span>
-    {{readPerSecond}}
-</span>
+<h2 class="text-7xl">{{name}}</h2>
+<h3 class="text-xl text-white/75">{{fingerprint}}</h3>
+<h4 class="text-2xl text-white">{{type}}</h4>
+</div>
 
 
 
-<br>
-<span><span id="written">{{writeTotal}}</span> GB</span>
-<br>
-<span><span id="read">{{readTotal}}</span>GB</span>
 
 <script>
 var writeTotal = parseFloat(`{{writeTotal}}`)

@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="flex flex-col justify-center content-center items-center py-44 w-screen">
+<div class="flex flex-col justify-center content-center items-center pt-44 w-screen">
     <form action="/relay/" method="POST" class="flex flex-col justify-center content-center items-center w-screen gap-2">
         {% csrf_token %}
         <label class="text-2xl text-tdpurple">Relay search</label>
-        <input required aria-required="true" id="relay" name="relay" type="text" class="w-1/2 border-tpurple border-2 focus:border-tdpurple rounded-xl transition-all" placeholder="Enter relay fingerprint or name (ex. 30C02E3926FB9A1AC37022FF5FF0120F90EF2235, CibulovySmerovac )">
+        <input required aria-required="true" id="relay" name="relay" type="text" class="w-1/2 border-tpurple border-2 focus:border-tdpurple rounded-xl transition-all" placeholder="Enter fingerprint, IP, hostname or nickname">
         <button type="submit" class="p-2 w-1/2 border-tpurple text-tpurple hover:bg-tpurple hover:text-white border-2 font-semibold text-xl rounded-xl transition-all">Search!</button>
     </form>
+    <div class="mt-8 text-tpurple/75">
+        <h3 class="text-xl text-tdpurple/75 text-center">Example searches</h3>
+        <ul class="flex flex-row gap-10">
+            <a href="/relay/DynamickaCibule">DynamickaCibule</a>
+            <a href="/relay/30C02E3926FB9A1AC37022FF5FF0120F90EF2235">30C02E3926FB9A1AC37022FF5FF0120F90EF2235</a>
+            <a href="/relay/tor-exit.sabotage.org">tor-exit.sabotage.org</a>
+            <a href="/relay/103.251.167.10">103.251.167.10</a>
+        </ul>
+    </div>
 </div>
 
 

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 handler404 = "torstat.views.error404"
@@ -24,7 +24,7 @@ handler400 = "torstat.views.error400"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("relay/<slug:name>", views.relay, name="relay"),
+    path("relay/<str:name>", views.relay, name="relay"),
     path("relay/", views.relayRaw, name="relay_raw"),
     path("", views.index, name="index")
 ]
