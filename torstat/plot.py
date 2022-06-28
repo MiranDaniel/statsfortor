@@ -1,5 +1,8 @@
 import matplotlib
 matplotlib.use('Agg')
+
+
+
 from matplotlib import pyplot as plt
 from io import StringIO, BytesIO
 from datetime import datetime
@@ -9,9 +12,18 @@ import matplotlib.dates as mdates
 import math
 import base64
 
+matplotlib.rcParams['text.color'] = '#7D4698'
+matplotlib.rcParams['axes.labelcolor'] = '#7D4698'
+matplotlib.rcParams['xtick.color'] = '#7D4698'
+matplotlib.rcParams['ytick.color'] = '#7D4698'
+
 def plot(write, read, unit, first, last, title, log=False):
     fig, ax = plt.subplots(figsize=(9,5))
     ax.set_title(f"Bandwidth {title}{' (log scale)' if log else ''}")
+    ax.tick_params(color='#7D4698', labelcolor='#59316B')
+    for spine in ax.spines.values():
+        spine.set_edgecolor('#59316B')
+
 
     write = np.array(write)
     read = np.array(write)
@@ -34,7 +46,7 @@ def plot(write, read, unit, first, last, title, log=False):
 
 
     ax.plot(timeAx,write, label="Write (upload ⬆️)", color="#68B030")
-    ax.plot(timeAx, read, label="Read (download ⬇️)", color="blueviolet")
+    ax.plot(timeAx, read, label="Read (download ⬇️)", color="blueviolet", linestyle = 'dashed')
 
     fig.autofmt_xdate()
     ax.grid()
@@ -47,7 +59,7 @@ def plot(write, read, unit, first, last, title, log=False):
 
 
     imgdata = StringIO()
-    fig.savefig(imgdata, format='svg')
+    fig.savefig(imgdata, format='svg', transparent=True)
     imgdata.seek(0)  # rewind the data
     plt.close(fig)
     return imgdata.getvalue()

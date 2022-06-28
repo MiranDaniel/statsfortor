@@ -10,18 +10,21 @@ from hashlib import sha1
 import socket
 import math
 from .plot import plot
+from datetime import datetime, timezone
+import arrow
+
 
 def convert_size(B, forceFloat=False, forceUnit=False):
     B = float(B)
     KB = float(1024)
-    MB = float(KB ** 2) # 1,048,576
-    GB = float(KB ** 3) # 1,073,741,824
-    TB = float(KB ** 4) # 1,099,511,627,776
+    MB = float(KB ** 2)  # 1,048,576
+    GB = float(KB ** 3)  # 1,073,741,824
+    TB = float(KB ** 4)  # 1,099,511,627,776
 
     if B < KB:
         if forceFloat:
             return B
-        return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
+        return '{0} {1}'.format(B, 'Bytes' if 0 == B > 1 else 'Byte')
     elif KB <= B < MB:
         if forceFloat:
             return B/KB
@@ -47,11 +50,19 @@ def convert_size(B, forceFloat=False, forceUnit=False):
             return "TB"
         return '{0:.2f} TB'.format(B / TB)
 
+
 def index(request, name=""):
     ctx = {
         "index": True
     }
     return render(request, "../templates/index.html", context=ctx)
+
+def donate(request, name=""):
+    ctx = {
+        "index": True,
+        "donate": True
+    }
+    return render(request, "../templates/donate.html", context=ctx)
 
 
 def relayRaw(request, name=""):
@@ -65,17 +76,20 @@ def relayRaw(request, name=""):
 
 def relay(request, name=""):
     print("CALL")
+
     def bridgeHandler(name, details):
         ctx = {
             "type_raw": "bridge",
             "name": details["bridges"][0]["nickname"],
             "fingerprint": details["bridges"][0]["hashed_fingerprint"],
-            "type": f"{', '.join(details['bridges'][0]['transports'])} bridge"
+            "type": f"{', '.join(details['bridges'][0]['transports'])} bridge",
+            "dataTypes": ["summary","details","uptime","weights","history"]
         }
         return render(request, "../templates/relay.html", context=ctx)
 
     def relayHandler(name, details, bandwidth):
         ctx = {
+            "dataTypes": ["summary","details","uptime","weights","history"],
             "type_raw": "relay",
             "name": details["relays"][0]["nickname"],
             "fingerprint": details["relays"][0]["fingerprint"],
@@ -89,9 +103,26 @@ def relay(request, name=""):
             "country_name": details["relays"][0].get("country_name"),
             "running": details["relays"][0].get("running"),
             "as_name": details["relays"][0].get("as_name"),
-            "as_number": details["relays"][0].get("as")
+            "as_number": details["relays"][0].get("as"),
+            "last_seen": details["relays"][0].get("last_seen"),
+            "last_changed_address_or_port": details["relays"][0].get("last_changed_address_or_port"),
+            "first_seen": details["relays"][0].get("first_seen"),
+            "last_restarted": details["relays"][0].get("last_restarted"),
+
+            "last_seen_ago": arrow.get(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))-arrow.get(
+                details["relays"][0].get("last_seen")
+            ),
+            "last_changed_address_or_port_ago": arrow.get(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))-arrow.get(
+                details["relays"][0].get("last_changed_address_or_port")
+            ),
+            "first_seen_ago": arrow.get(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))-arrow.get(
+                details["relays"][0].get("first_seen")
+            ),
+            "last_restarted_ago": arrow.get(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))-arrow.get(
+                details["relays"][0].get("last_restarted")
+            ),
         }
-        
+
         ctx["type"] = "Middle"
         if "Exit" in details["relays"][0]["flags"]:
             ctx["type"] = "Exit"
@@ -104,17 +135,11 @@ def relay(request, name=""):
         if "Authority" in details["relays"][0]["flags"]:
             ctx["type"] = "Authority"
 
-
-
-
-
         ctx["write_count"] = bandwidth["relays"][0]["write_history"]["6_months"]["count"]
         ctx["read_count"] = bandwidth["relays"][0]["read_history"]["6_months"]["count"]
 
-
-
         for i in ["1_month", "6_months", "1_year", "5_years"]:
-            if i not in  bandwidth["relays"][0]["read_history"]:
+            if i not in bandwidth["relays"][0]["read_history"]:
                 break
 
             ctx["writes"] = bandwidth["relays"][0]["write_history"][i]["values"]
@@ -123,34 +148,34 @@ def relay(request, name=""):
             ctx["writes"] = [x for x in ctx["writes"] if x is not None]
             ctx["reads"] = [x for x in ctx["reads"] if x is not None]
 
-
-
             ctx["write_factor"] = bandwidth["relays"][0]["write_history"][i]["factor"]
             ctx["read_factor"] = bandwidth["relays"][0]["read_history"][i]["factor"]
 
-            ctx["writesNice"] = [convert_size(i*ctx["write_factor"],True) for i in ctx["writes"]]
-            ctx["readsNice"] = [convert_size(i*ctx["read_factor"],True) for i in ctx["reads"]]
-
+            ctx["writesNice"] = [convert_size(
+                i*ctx["write_factor"], True) for i in ctx["writes"]]
+            ctx["readsNice"] = [convert_size(
+                i*ctx["read_factor"], True) for i in ctx["reads"]]
 
             ctx[f"plotData_{i}"] = plot(
-                ctx["writesNice"], 
-                ctx["readsNice"], 
-                convert_size(ctx["read_factor"]*ctx["reads"][-1], forceUnit=True),
+                ctx["writesNice"],
+                ctx["readsNice"],
+                convert_size(ctx["read_factor"]*ctx["reads"]
+                             [-1], forceUnit=True),
                 bandwidth["relays"][0]["read_history"][i]["first"],
                 bandwidth["relays"][0]["read_history"][i]["last"],
                 i
             )
 
             ctx[f"plotDataLog_{i}"] = plot(
-                ctx["writesNice"], 
-                ctx["readsNice"], 
-                convert_size(ctx["read_factor"]*ctx["reads"][-1], forceUnit=True),
+                ctx["writesNice"],
+                ctx["readsNice"],
+                convert_size(ctx["read_factor"]*ctx["reads"]
+                             [-1], forceUnit=True),
                 bandwidth["relays"][0]["read_history"][i]["first"],
                 bandwidth["relays"][0]["read_history"][i]["last"],
                 i,
                 True
             )
-
 
         ctx["writeTotal"] = 0
         ctx["readTotal"] = 0
@@ -166,14 +191,20 @@ def relay(request, name=""):
         ctx["writePerSecond"] = ctx["writes"][-1]*ctx["write_factor"]
         ctx["readPerSecond"] = ctx["reads"][-1]*ctx["read_factor"]
 
-        ctx["writePerSecondNice"] = convert_size(ctx["writes"][-1]*ctx["write_factor"])
-        ctx["readPerSecondNice"] = convert_size(ctx["reads"][-1]*ctx["read_factor"])
+        ctx["writePerSecondNice"] = convert_size(
+            ctx["writes"][-1]*ctx["write_factor"])
+        ctx["readPerSecondNice"] = convert_size(
+            ctx["reads"][-1]*ctx["read_factor"])
 
-        ctx["bandwithRateNice"] = convert_size(details["relays"][0]["bandwidth_rate"])
-        ctx["bandwidthBurstNice"] = convert_size(details["relays"][0]["bandwidth_burst"])
+        ctx["bandwithRateNice"] = convert_size(
+            details["relays"][0]["bandwidth_rate"])
+        ctx["bandwidthBurstNice"] = convert_size(
+            details["relays"][0]["bandwidth_burst"])
 
-        ctx["bandwidthObservedNice"] = convert_size(details["relays"][0]["observed_bandwidth"])
-        ctx["bandwidthAdvertisedNice"] = convert_size(details["relays"][0]["advertised_bandwidth"])
+        ctx["bandwidthObservedNice"] = convert_size(
+            details["relays"][0]["observed_bandwidth"])
+        ctx["bandwidthAdvertisedNice"] = convert_size(
+            details["relays"][0]["advertised_bandwidth"])
 
         return render(request, "../templates/relay.html", context=ctx)
 
@@ -183,7 +214,6 @@ def relay(request, name=""):
             socket.inet_aton(name)
         except socket.error:
             prefix = "host_name:"
-    
 
     def _getDetails(name):
         print("DETAILS")
@@ -212,7 +242,10 @@ def relay(request, name=""):
 
     res = check(details)
     if res[-1] != True:
-        name = sha1(a2b_hex(name)).hexdigest().upper()
+        try:
+            name = sha1(a2b_hex(name)).hexdigest().upper()
+        except Exception:
+            return error404(request, relay=name)
         return redirect(f"/relay/{name}")
     return res[0]
 

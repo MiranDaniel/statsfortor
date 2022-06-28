@@ -26,5 +26,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("relay/<str:name>", views.relay, name="relay"),
     path("relay/", views.relayRaw, name="relay_raw"),
-    path("", views.index, name="index")
+    path("", views.index, name="index"),
+    path("donate/", views.donate, name="donate"),
 ]

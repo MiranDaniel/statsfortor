@@ -74,6 +74,33 @@
                     </ul>
                 </div>
             </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Time</h4>
+                <div>
+                    <h5 class="font-semibold">Last seen</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{last_seen}} | {{last_seen_ago}} ago</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">First seen</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{first_seen}} | {{first_seen_ago}} ago</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Last changed address or port</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{last_changed_address_or_port}} | {{last_changed_address_or_port_ago}} ago</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Last restarted</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{last_restarted}} | {{last_restarted_ago}} ago</span>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="flex flex-col gap-5 w-2/3">
             <div class="border-tpurple p-2 border-2 rounded-xl">
@@ -141,7 +168,16 @@
             </div>
         </div>
     </div>
+    <div class="flex flex-col justify-center items-center content-center py-16">
+        <div class="flex flex-row justify-center items-center content-center gap-5">
+            {% for i in dataTypes%}
 
+            <a href="https://onionoo.torproject.org/{{i}}?search={{fingerprint}}"><button
+                    class="p-0.5 px-3 bg-tpurple rounded-xl border-2 border-tpurple text-white hover:bg-white hover:text-tpurple transition-all">Download
+                    all {{i}} data</button></a>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 
