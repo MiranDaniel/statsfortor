@@ -56,7 +56,9 @@
                 <div>
                     <h5 class="font-semibold">Country</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
-                        <span class="flex flex-row text-md align-middle items-center gap-x-3"><img src="/static/flags/4x3/{{country}}.svg" class="h-4" alt="{{country}}">{{country_name}}</span>
+                        <span class="flex flex-row text-md align-middle items-center gap-x-3"><img
+                                src="/static/flags/4x3/{{country}}.svg" class="h-4"
+                                alt="{{country}}">{{country_name}}</span>
                     </ul>
                 </div>
                 <div>
@@ -73,7 +75,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex flex-col gap-5 w-1/2">
+        <div class="flex flex-col gap-5 w-2/3">
             <div class="border-tpurple p-2 border-2 rounded-xl">
                 <h4 class="text-2xl">Flags</h4>
                 <ul class="flex flex-row flex-wrap gap-x-5 text-lg mx-5">
@@ -92,27 +94,56 @@
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Bandwidth</h4>
                 <div>
-                    <h5 class="font-semibold">Advertised bandwidth</h5>
+                    <h5 class="font-semibold">Calculated bandwidth</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
-                        <li>{{writePerSecond/10}} ⬆️</li>
+                        <li>{{writePerSecondNice}}/s ⬆️</li>
+                        <li>{{readPerSecondNice}}/s ⬇️</li>
                     </ul>
                 </div>
                 <div>
-                    <h5 class="font-semibold">AS Number</h5>
+                    <h5 class="font-semibold">Observed rate</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
-                        <pre><code>{{as_number}}</code></pre>
+                        <span>{{bandwidthObservedNice}}/s</span>
                     </ul>
                 </div>
                 <div>
-                    <h5 class="font-semibold">AS Name</h5>
+                    <h5 class="font-semibold">Advertised Burst</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
-                        <span>{{as_name}}</span>
+                        <span>{{bandwidthAdvertisedNice}}/s</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Bandwidth rate</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{bandwithRateNice}}/s</span>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
+    <div class="flex flex-col justify-center items-center content-center py-16">
+        <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
+            <div class="flex flex-row">
+                {{plotData_1_month|safe}}
+                {{plotDataLog_1_month|safe}}
+            </div>
+            <div class="flex flex-row">
+                {{plotData_6_months|safe}}
+                {{plotDataLog_6_months|safe}}
+            </div>
+            <div class="flex flex-row">
+                {{plotData_1_year|safe}}
+                {{plotDataLog_1_year|safe}}
+            </div>
+            <div class="flex flex-row">
+                {{plotData_5_years|safe}}
+                {{plotDataLog_5_years|safe}}
+            </div>
+        </div>
+    </div>
+
 </div>
+
 
 <script>
     var writeTotal = parseFloat(`{{writeTotal}}`)
