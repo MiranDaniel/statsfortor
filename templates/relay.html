@@ -75,7 +75,7 @@
                 </div>
             </div>
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
-                <h4 class="text-2xl">Time</h4>
+                <h4 class="text-2xl">Time<small class="text-xs my-0 py-0 mx-2">All time is UTC-0</small></h4>
                 <div>
                     <h5 class="font-semibold">Last seen</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
@@ -95,14 +95,68 @@
                     </ul>
                 </div>
                 <div>
-                    <h5 class="font-semibold">Last restarted</h5>
+                    <h5 class="font-semibold">Last restarted (uptime/downtime)</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
                         <span>{{last_restarted}} | {{last_restarted_ago}} ago</span>
                     </ul>
                 </div>
             </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Client</h4>
+                <div>
+                    <h5 class="font-semibold">Platform</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{platform}}</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Version Status</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span class="capitalize">{{version_status}}</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Measured</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{measured}}</span>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Consensus & network</h4>
+                <div>
+                    <h5 class="font-semibold">Consensus weight</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{consensus_weight}}</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Consensus weight fraction</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span class="capitalize">{{consensus_weight_fraction}}%</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Guard probability</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{guard_probability}}%</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Middle probability</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{middle_probability}}%</span>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold">Exit probability</h5>
+                    <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
+                        <span>{{exit_probability}}%</span>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="flex flex-col gap-5 w-2/3">
+        <div class="flex flex-col gap-5 w-3/4">
             <div class="border-tpurple p-2 border-2 rounded-xl">
                 <h4 class="text-2xl">Flags</h4>
                 <ul class="flex flex-row flex-wrap gap-x-5 text-lg mx-5">
@@ -146,38 +200,116 @@
                     </ul>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="flex flex-col justify-center items-center content-center py-16">
-        <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
-            <div class="flex flex-row">
-                {{plotData_1_month|safe}}
-                {{plotDataLog_1_month|safe}}
-            </div>
-            <div class="flex flex-row">
-                {{plotData_6_months|safe}}
-                {{plotDataLog_6_months|safe}}
-            </div>
-            <div class="flex flex-row">
-                {{plotData_1_year|safe}}
-                {{plotDataLog_1_year|safe}}
-            </div>
-            <div class="flex flex-row">
-                {{plotData_5_years|safe}}
-                {{plotDataLog_5_years|safe}}
-            </div>
-        </div>
-    </div>
-    <div class="flex flex-col justify-center items-center content-center py-16">
-        <div class="flex flex-row justify-center items-center content-center gap-5">
-            {% for i in dataTypes%}
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Family</h4>
+                <div class="flex flex-row justify-between gap-2">
 
-            <a href="https://onionoo.torproject.org/{{i}}?search={{fingerprint}}"><button
-                    class="p-0.5 px-3 bg-tpurple rounded-xl border-2 border-tpurple text-white hover:bg-white hover:text-tpurple transition-all">Download
-                    all {{i}} data</button></a>
-            {% endfor %}
+                    <div class="overflow-scroll w-1/2 bg-tpurple/10 p-2 rounded-xl">
+                        <h5 class="font-semibold">Effective family</h5>
+                        <div class="max-h-96">
+                            <pre class="overflow-scroll" style="white-space:normal;">
+                        <ul class="flex flex-col list-disc mx-5 p-0">
+                            {% for i in effective_family%}
+                            <a href="/relay/{{i}}">
+                                <li class="text-sm">{{i}}</li>
+                            </a>
+                            {% endfor %}
+                        </ul>
+                    </pre>
+                        </div>
+                    </div>
+                    <div class="overflow-scroll w-1/2 bg-tpurple/10 p-2 rounded-xl">
+                        <h5 class="font-semibold">Alleged family</h5>
+                        <div class="max-h-96">
+                            <pre class="overflow-scroll" style="white-space:normal;">
+                        <ul class="flex flex-col list-disc mx-5 p-0">
+                            {% for i in alleged_family%}
+                            <a href="/relay/{{i}}">
+                                <li class="text-sm">{{i}}</li>
+                            </a>
+                            {% endfor %}
+                        </ul>
+                    </pre>
+                        </div>
+                    </div>
+                    <div class="overflow-scroll w-1/2 bg-tpurple/10 p-2 rounded-xl">
+                        <h5 class="font-semibold">Indirect family</h5>
+                        <div class="max-h-96">
+                            <pre class="overflow-scroll" style="white-space:normal;">
+                        <ul class="flex flex-col list-disc mx-5 p-0">
+                            {% for i in indirect_family%}
+                            <a href="/relay/{{i}}">
+                                <li class="text-sm">{{i}}</li>
+                            </a>
+                            {% endfor %}
+                        </ul>
+                    </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl text-md">
+                <h4 class="text-2xl">Exit policy summary</h4>
+                <div class="flex flex-row justify-between gap-16">
+                    <div class="overflow-scroll w-1/2 bg-tpurple/10 p-2 rounded-xl">
+                        <h5 class="font-semibold">Reject</h5>
+                        <div class="max-h-64">
+                            <pre class="overflow-scroll" style="white-space:normal;">
+                            <ul class="flex flex-col list-disc mx-5 p-0">
+                                {% for i in exit_policy_summary_reject%}
+                                <li class="text-sm">{{i}}</li>
+                                {% endfor %}
+                            </ul>
+                        </pre>
+                        </div>
+                    </div>
+                    <div class="overflow-scroll w-1/2 bg-tpurple/10 p-2 rounded-xl">
+                        <h5 class="font-semibold">Accept</h5>
+                        <div class="max-h-64">
+                            <pre class="overflow-scroll" style="white-space:normal;">
+                            <ul class="flex flex-col list-disc mx-5 p-0">
+                                {% for i in exit_policy_summary_accept%}
+                                <li class="text-sm">{{i}}</li>
+                                {% endfor %}
+                            </ul>
+                        </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+<div class="flex flex-col justify-center items-center content-center py-16">
+    <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
+        <div class="flex flex-row">
+            {{plotData_1_month|safe}}
+            {{plotDataLog_1_month|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotData_6_months|safe}}
+            {{plotDataLog_6_months|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotData_1_year|safe}}
+            {{plotDataLog_1_year|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotData_5_years|safe}}
+            {{plotDataLog_5_years|safe}}
+        </div>
+    </div>
+</div>
+<div class="flex flex-col justify-center items-center content-center py-16">
+    <div class="flex flex-row justify-center items-center content-center gap-5">
+        {% for i in dataTypes%}
+
+        <a href="https://onionoo.torproject.org/{{i}}?search={{fingerprint}}"><button
+                class="p-0.5 px-3 bg-tpurple rounded-xl border-2 border-tpurple text-white hover:bg-white hover:text-tpurple transition-all">Download
+                all {{i}} data</button></a>
+        {% endfor %}
+    </div>
+</div>
 </div>
 
 
