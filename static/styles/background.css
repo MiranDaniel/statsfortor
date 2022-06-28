@@ -1,18 +1,25 @@
 @media only screen and (min-width: 600px) {
 
-    body {
+    .header {
         background-image: url("/static/bg-desktop.svg");
         background-repeat: no-repeat;
         background-size: cover;
+        overflow: visible;
+        padding-bottom: 500px;
+        margin-bottom: -500px;
     }
 }
 
 @media only screen and (max-width: 600px) {
 
-    body {
+    .header {
         background-image: url("/static/bg-mobile.svg");
         background-repeat: no-repeat;
         background-size: cover;
+        overflow: visible;
+        padding-bottom: 500px;
+        margin-bottom: -500px;
+
     }
 }
 

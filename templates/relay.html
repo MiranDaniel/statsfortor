@@ -280,6 +280,9 @@
         </div>
     </div>
 </div>
+<div class="flex flex-row justify-center items-center py-16 pt-32">
+    <hr class="w-2/3 mx-auto border-tpurple border-2">
+</div>
 <div class="flex flex-col justify-center items-center content-center py-16">
     <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
         <div class="flex flex-row">
@@ -300,6 +303,29 @@
         </div>
     </div>
 </div>
+<div class="flex flex-row justify-center items-center">
+    <hr class="w-2/3 mx-auto border-tpurple border-2">
+</div>
+<div class="flex flex-col justify-center items-center content-center py-16">
+    <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
+        <div class="flex flex-row">
+            {{plotWeight_1_month|safe}}
+            {{plotWeightLog_1_month|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotWeight_6_months|safe}}
+            {{plotWeightLog_6_months|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotWeight_1_year|safe}}
+            {{plotWeightLog_1_year|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{plotWeight_5_years|safe}}
+            {{plotWeightLog_5_years|safe}}
+        </div>
+    </div>
+</div>
 <div class="flex flex-col justify-center items-center content-center py-16">
     <div class="flex flex-row justify-center items-center content-center gap-5">
         {% for i in dataTypes%}
@@ -311,23 +337,5 @@
     </div>
 </div>
 </div>
-
-
-<script>
-    var writeTotal = parseFloat(`{{writeTotal}}`)
-    var readTotal = parseFloat(`{{readTotal}}`)
-
-    var writePerSecond = parseFloat(`{{writePerSecond}}`) / 100
-    var readperSecond = parseFloat(`{{readPerSecond}}`) / 100
-
-
-    function increment() {
-        writeTotal += writePerSecond
-        readTotal += readperSecond
-        document.getElementById("written").innerText = Math.round(writeTotal / 1000 / 10) / 100000
-        document.getElementById("read").innerText = Math.round(readTotal / 1000 / 10) / 100000
-    }
-    setInterval(increment, 10)
-</script>
 
 {% endblock %}

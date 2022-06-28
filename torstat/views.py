@@ -9,10 +9,11 @@ from binascii import a2b_hex
 from hashlib import sha1
 import socket
 import math
-from .plot import plot
+from .plot import plotBandwidth, plotWeights
 from datetime import datetime, timezone
 import arrow
-
+import multiprocessing
+from django.core.cache import cache
 
 def convert_size(B, forceFloat=False, forceUnit=False):
     B = float(B)
@@ -83,11 +84,15 @@ def relay(request, name=""):
             "name": details["bridges"][0]["nickname"],
             "fingerprint": details["bridges"][0]["hashed_fingerprint"],
             "type": f"{', '.join(details['bridges'][0]['transports'])} bridge",
-            "dataTypes": ["summary","details","uptime","weights","history"]
+            "dataTypes": ["summary","details","uptime","weights","history"],
+            "flags": details["bridges"][0].get("flags"),
+            "flags_l": [i.lower() for i in details["bridges"][0].get("flags")],
+
+
         }
         return render(request, "../templates/relay.html", context=ctx)
 
-    def relayHandler(name, details, bandwidth):
+    def relayHandler(name, details, bandwidth, weights):
         ctx = {
             "dataTypes": ["summary","details","uptime","weights","history"],
             "type_raw": "relay",
@@ -151,47 +156,143 @@ def relay(request, name=""):
         ctx["write_count"] = bandwidth["relays"][0]["write_history"]["6_months"]["count"]
         ctx["read_count"] = bandwidth["relays"][0]["read_history"]["6_months"]["count"]
 
-        for i in ["1_month", "6_months", "1_year", "5_years"]:
-            if i not in bandwidth["relays"][0]["read_history"]:
-                break
+        print("=== RENDERING START ===")
 
-            ctx["writes"] = bandwidth["relays"][0]["write_history"][i]["values"]
-            ctx["reads"] = bandwidth["relays"][0]["read_history"][i]["values"]
+        found = False
+        for j in ["plotData_","plotDataLog_","plotWeight_","plotWeightLog_"]:
+            for i in ["1_month", "6_months", "1_year", "5_years"]:
+                check = f"{ctx['fingerprint']}|{j}{i}"
+                x = cache.get(check)
+                if x != None:
+                    ctx[f"{j}{i}"] = x
+                    found = True
 
-            ctx["writes"] = [x for x in ctx["writes"] if x is not None]
-            ctx["reads"] = [x for x in ctx["reads"] if x is not None]
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+        jobs = []
 
-            ctx["write_factor"] = bandwidth["relays"][0]["write_history"][i]["factor"]
-            ctx["read_factor"] = bandwidth["relays"][0]["read_history"][i]["factor"]
+        if not found:
+            for i in ["1_month", "6_months", "1_year", "5_years"]:
+                if i not in bandwidth["relays"][0]["read_history"]:
+                    break
 
-            ctx["writesNice"] = [convert_size(
-                i*ctx["write_factor"], True) for i in ctx["writes"]]
-            ctx["readsNice"] = [convert_size(
-                i*ctx["read_factor"], True) for i in ctx["reads"]]
+                ctx["writes"] = bandwidth["relays"][0]["write_history"][i]["values"]
+                ctx["reads"] = bandwidth["relays"][0]["read_history"][i]["values"]
 
-            ctx[f"plotData_{i}"] = plot(
-                ctx["writesNice"],
-                ctx["readsNice"],
-                convert_size(ctx["read_factor"]*ctx["reads"]
-                             [-1], forceUnit=True),
-                bandwidth["relays"][0]["read_history"][i]["first"],
-                bandwidth["relays"][0]["read_history"][i]["last"],
-                i
-            )
+                ctx["writes"] = [x for x in ctx["writes"] if x is not None]
+                ctx["reads"] = [x for x in ctx["reads"] if x is not None]
 
-            ctx[f"plotDataLog_{i}"] = plot(
-                ctx["writesNice"],
-                ctx["readsNice"],
-                convert_size(ctx["read_factor"]*ctx["reads"]
-                             [-1], forceUnit=True),
-                bandwidth["relays"][0]["read_history"][i]["first"],
-                bandwidth["relays"][0]["read_history"][i]["last"],
-                i,
-                True
-            )
+                ctx["write_factor"] = bandwidth["relays"][0]["write_history"][i]["factor"]
+                ctx["read_factor"] = bandwidth["relays"][0]["read_history"][i]["factor"]
 
+                ctx["writesNice"] = [convert_size(
+                    i*ctx["write_factor"], True) for i in ctx["writes"]]
+                ctx["readsNice"] = [convert_size(
+                    i*ctx["read_factor"], True) for i in ctx["reads"]]
+
+                ctx["consensus_weight_fraction_"] = [x for x in weights["relays"][0]["consensus_weight_fraction"][i]["values"] if x is not None]
+                ctx["guard_probability_"] = [x for x in weights["relays"][0]["guard_probability"][i]["values"] if x is not None]
+                ctx["middle_probability_"] = [x for x in weights["relays"][0]["middle_probability"][i]["values"] if x is not None]
+                ctx["exit_probability_"] = [x for x in weights["relays"][0]["exit_probability"][i]["values"] if x is not None]
+
+
+                ctx["consensus_weight_fraction_"] = [x*weights["relays"][0]["consensus_weight_fraction"][i]["factor"] for x in ctx["consensus_weight_fraction_"]]
+                ctx["guard_probability_"] = [x*weights["relays"][0]["guard_probability"][i]["factor"] for x in ctx["guard_probability_"]]
+                ctx["middle_probability_"] = [x*weights["relays"][0]["middle_probability"][i]["factor"] for x in ctx["middle_probability_"]]
+                ctx["exit_probability_"] = [x*weights["relays"][0]["exit_probability"][i]["factor"] for x in ctx["exit_probability_"]]
+
+                p = multiprocessing.Process(target=plotBandwidth, args=(
+                    return_dict,
+                    ctx["writesNice"],
+                    ctx["readsNice"],
+                    convert_size(ctx["read_factor"]*ctx["reads"]
+                                [-1], forceUnit=True),
+                    bandwidth["relays"][0]["read_history"][i]["first"],
+                    bandwidth["relays"][0]["read_history"][i]["last"],
+                    i
+                ))
+                jobs.append(p)
+                p.start()
+
+                p = multiprocessing.Process(target=plotWeights, args=(
+                    return_dict,
+                    ctx["consensus_weight_fraction_"],
+                    ctx["guard_probability_"],
+                    ctx["middle_probability_"],
+                    ctx["exit_probability_"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["first"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["last"],
+                    i
+                ))
+                jobs.append(p)
+                p.start()
+
+                """
+                ctx[f"plotData_{i}"] = plotBandwidth(
+                    ctx["writesNice"],
+                    ctx["readsNice"],
+                    convert_size(ctx["read_factor"]*ctx["reads"]
+                                [-1], forceUnit=True),
+                    bandwidth["relays"][0]["read_history"][i]["first"],
+                    bandwidth["relays"][0]["read_history"][i]["last"],
+                    i
+                )
+
+                ctx[f"plotDataLog_{i}"] = plotBandwidth(
+                    ctx["writesNice"],
+                    ctx["readsNice"],
+                    convert_size(ctx["read_factor"]*ctx["reads"]
+                                [-1], forceUnit=True),
+                    bandwidth["relays"][0]["read_history"][i]["first"],
+                    bandwidth["relays"][0]["read_history"][i]["last"],
+                    i,
+                    True
+                )
+
+                ctx[f"plotWeight_{i}"] = plotWeights(
+                    ctx["consensus_weight_fraction_"],
+                    ctx["guard_probability_"],
+                    ctx["middle_probability_"],
+                    ctx["exit_probability_"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["first"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["last"],
+                    i
+                )
+                ctx[f"plotWeightLog_{i}"] = plotWeights(
+                    ctx["consensus_weight_fraction_"],
+                    ctx["guard_probability_"],
+                    ctx["middle_probability_"],
+                    ctx["exit_probability_"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["first"],
+                    weights["relays"][0]["consensus_weight_fraction"][i]["last"],
+                    i,
+                    True
+                )
+                """
+
+            for proc in jobs:
+                proc.join()
+
+            
+            for i in return_dict:
+                print(f"{ctx['fingerprint']}|{i}")
+                cache.set(f"{ctx['fingerprint']}|{i}", return_dict[i], timeout=600)
+                ctx[i] = return_dict[i]
+
+
+        print("=== RENDERING END ===")
+        if found:
+            print("=== USED CACHE ===")
+        else:
+            print("=== DIDNT USE CACHE === ")
         ctx["writeTotal"] = 0
         ctx["readTotal"] = 0
+
+        ctx["writes"] = bandwidth["relays"][0]["write_history"]["1_month"]["values"]
+        ctx["reads"] = bandwidth["relays"][0]["read_history"]["1_month"]["values"]
+
+        ctx["write_factor"] = bandwidth["relays"][0]["write_history"]["1_month"]["factor"]
+        ctx["read_factor"] = bandwidth["relays"][0]["read_history"]["1_month"]["factor"]
 
         for i in ctx["writes"]:
             ctx["writeTotal"] += i*ctx["write_factor"] * \
@@ -241,6 +342,13 @@ def relay(request, name=""):
         print(f"{r.status_code=}")
         return r.json()
 
+    def _getWeights(name):
+        r = requests.get(
+            f"https://onionoo.torproject.org/weights?search={prefix}{name}")
+        print(f"{r.status_code=}")
+        return r.json()
+
+
     details = _getDetails(name)
 
     def check(details):
@@ -249,8 +357,10 @@ def relay(request, name=""):
 
         if len(details["relays"]) != 0:
             bandwidth = _getBandwidth(name)
-            return relayHandler(name, details, bandwidth), True
+            weights = _getWeights(name)
+            return relayHandler(name, details, bandwidth, weights), True
         if len(details["bridges"]) != 0:
+            print("Bridge")
             return bridgeHandler(name, details), True
 
     res = check(details)
