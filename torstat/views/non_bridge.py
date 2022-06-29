@@ -60,13 +60,13 @@ def relayHandler(request, name, details, bandwidth, weights, uptime):
     print("=== RENDERING START ===")
 
     found = False
-    #for j in ["plotData_", "plotDataLog_", "plotWeight_", "plotWeightLog_", "uptimeData_", "uptimeDataLog_"]:
-    #    for i in ["1_month", "6_months", "1_year", "5_years"]:
-    #        check = f"{ctx['fingerprint']}|{j}{i}"
-    #    x = cache.get(check)
-    #    if x != None:
-    #        ctx[f"{j}{i}"] = x
-    #        found = True
+    for j in ["plotData_", "plotDataLog_", "plotWeight_", "plotWeightLog_", "uptimeData_", "uptimeDataLog_"]:
+        for i in ["1_month", "6_months", "1_year", "5_years"]:
+            check = f"{ctx['fingerprint']}|{j}{i}"
+        x = cache.get(check)
+        if x != None:
+            ctx[f"{j}{i}"] = x
+            found = True
 
     if not found:
         manager = multiprocessing.Manager()
