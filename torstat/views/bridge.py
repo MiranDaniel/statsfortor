@@ -22,7 +22,6 @@ def bridgeHandler(request, name, details, bandwidth, clients):
         "first_seen": details["bridges"][0].get("first_seen"),
         "last_seen": details["bridges"][0].get("last_seen"),
         "last_restarted": details["bridges"][0].get("last_restarted"),
-        "blocklist": [(i, pycountry.countries.get(alpha_2=i).name) for i in details["bridges"][0].get("blocklist")],
         "last_seen_ago": arrow.get(datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"))-arrow.get(
             details["bridges"][0].get("last_seen")
         ),
@@ -39,9 +38,13 @@ def bridgeHandler(request, name, details, bandwidth, clients):
         "platform": details["bridges"][0]["platform"],
         "advertised_bandwidth": convert_size(details["bridges"][0]["advertised_bandwidth"]),
         "contact": details["bridges"][0]["contact"],
-        "bridgedb_distributor": details["bridges"][0]["bridgedb_distributor"],
+        "bridgedb_distributor": details["bridges"][0].get("bridgedb_distributor"),
         "bandwidthAdvertisedNice": convert_size(details["bridges"][0]["advertised_bandwidth"])
     }
+    if details["bridges"][0].get("blocklist") != None:
+        ctx["blocklist"] =  [(i, pycountry.countries.get(alpha_2=i).name) for i in details["bridges"][0].get("blocklist")],
+    else:
+        ctx["blocklist"] = []
 
     print("=== RENDERING START ===")
 

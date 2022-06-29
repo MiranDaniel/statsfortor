@@ -36,10 +36,10 @@ def relayRaw(request, name=""):
 
 
 def node(request, name=""):
-    c = cache.get(name)
-    if c != None:
-        print("Using cache")
-        return c
+    #c = cache.get(name)
+    #if c != None:
+    #    print("Using cache")
+    #    return c
 
     prefix = ""
     if "." in name:
