@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
+
 from . import views
 
 handler404 = "torstat.views.error404"
@@ -24,8 +25,11 @@ handler400 = "torstat.views.error400"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("relay/<str:name>", views.relay, name="relay"),
-    path("relay/", views.relayRaw, name="relay_raw"),
+    path("relay/<str:name>", views.node, name="relay"),
+    path("bridge/<str:name>", views.node, name="bridge"),
+    path("exit/<str:name>", views.node, name="exit"),
+    path("search/<str:name>", views.node, name="search"),
+    path("search/", views.relayRaw, name="search"),
     path("", views.index, name="index"),
     path("donate/", views.donate, name="donate"),
 ]

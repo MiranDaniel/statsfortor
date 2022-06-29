@@ -23,12 +23,14 @@
             <div class="border-tpurple p-2 border-2 rounded-xl">
                 <h4 class="text-2xl">IP Addresses</h4>
                 <div class="flex flex-col gap-3">
+                    {% if type_raw == "relay" %}
                     <div>
                         <h5 class="font-semibold">Dir Address</h5>
                         <ul class="flex flex-col gap-0 text-sm list-disc mx-5">
                             <pre><code>{{dir_address}}</code></pre>
                         </ul>
                     </div>
+                    {% endif %}
                     <div>
                         <h5 class="font-semibold">OR Addresses</h5>
                         <ul class="flex flex-col gap-0 text-sm list-disc mx-5">
@@ -39,6 +41,7 @@
                             {% endfor %}
                         </ul>
                     </div>
+                    {% if type_raw == "relay" %}
                     <div>
                         <h5 class="font-semibold">Exit Addresses</h5>
                         <ul class="flex flex-col gap-0 text-sm list-disc mx-5">
@@ -49,8 +52,10 @@
                             {% endfor %}
                         </ul>
                     </div>
+                    {% endif %}
                 </div>
             </div>
+            {% if type_raw == "relay" %}
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Origin</h4>
                 <div>
@@ -74,6 +79,7 @@
                     </ul>
                 </div>
             </div>
+            {% endif %}
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Time<small class="text-xs my-0 py-0 mx-2">All time is UTC-0</small></h4>
                 <div>
@@ -88,12 +94,14 @@
                         <span>{{first_seen}} | {{first_seen_ago}} ago</span>
                     </ul>
                 </div>
+                {% if type_raw == "relay" %}
                 <div>
                     <h5 class="font-semibold">Last changed address or port</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
                         <span>{{last_changed_address_or_port}} | {{last_changed_address_or_port_ago}} ago</span>
                     </ul>
                 </div>
+                {% endif %}
                 <div>
                     <h5 class="font-semibold">Last restarted (uptime/downtime)</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
@@ -115,13 +123,16 @@
                         <span class="capitalize">{{version_status}}</span>
                     </ul>
                 </div>
+                {% if type_raw == "relay" %}
                 <div>
                     <h5 class="font-semibold">Measured</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
                         <span>{{measured}}</span>
                     </ul>
                 </div>
+                {% endif %}
             </div>
+            {% if type_raw == "relay" %}
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Consensus & network</h4>
                 <div>
@@ -155,6 +166,7 @@
                     </ul>
                 </div>
             </div>
+            {% endif %}
         </div>
         <div class="flex flex-col gap-5 w-3/4">
             <div class="border-tpurple p-2 border-2 rounded-xl">
@@ -174,6 +186,7 @@
             </div>
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Bandwidth</h4>
+                {% if type_raw == "relay" %}
                 <div>
                     <h5 class="font-semibold">Calculated bandwidth</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
@@ -187,19 +200,23 @@
                         <span>{{bandwidthObservedNice}}/s</span>
                     </ul>
                 </div>
+                {% endif %}
                 <div>
-                    <h5 class="font-semibold">Advertised Burst</h5>
+                    <h5 class="font-semibold">Advertised rate</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
                         <span>{{bandwidthAdvertisedNice}}/s</span>
                     </ul>
                 </div>
+                {% if type_raw == "relay" %}
                 <div>
                     <h5 class="font-semibold">Bandwidth rate</h5>
                     <ul class="flex flex-col gap-0 list-disc mx-5 p-0">
                         <span>{{bandwithRateNice}}/s</span>
                     </ul>
                 </div>
+                {% endif %}
             </div>
+            {% if type_raw == "relay" %}
             <div class="border-tpurple p-2 border-2 rounded-xl text-md">
                 <h4 class="text-2xl">Family</h4>
                 <div class="flex flex-row justify-between gap-2">
@@ -277,9 +294,53 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <div class="border-tpurple p-2 border-2 rounded-xl">
+                <h4 class="text-2xl">Transports</h4>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <ul class="flex flex-col gap-0 text-sm list-disc mx-5">
+                            {% for i in transports %}
+                            <li>
+                                <pre><code>{{i}}</code></pre>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl">
+                <h4 class="text-2xl">Bridge distribution mechanism</h4>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <ul class="flex flex-col gap-0 text-sm list-disc mx-5">
+                            <li>
+                                <pre><code>{{bridgedb_distributor}}</code></pre>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-tpurple p-2 border-2 rounded-xl">
+                <h4 class="text-2xl">Blocked in</h4>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <ul class="flex flex-col gap-0 list-disc mx-5">
+                            {% for i in blocklist %}
+                            <li>
+                                <span class="flex flex-row text-md align-middle items-center gap-x-3"><img
+                                        src="/static/flags/4x3/{{i.0}}.svg" class="h-4" alt="{{i.0}}">{{i.1}}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
 <div class="flex flex-row justify-center items-center py-16 pt-32">
     <hr class="w-2/3 mx-auto border-tpurple border-2">
 </div>
@@ -303,6 +364,7 @@
         </div>
     </div>
 </div>
+{% if type_raw == "relay" %}
 <div class="flex flex-row justify-center items-center">
     <hr class="w-2/3 mx-auto border-tpurple border-2">
 </div>
@@ -326,6 +388,32 @@
         </div>
     </div>
 </div>
+{% else%}
+<div class="flex flex-row justify-center items-center">
+    <hr class="w-2/3 mx-auto border-tpurple border-2">
+</div>
+<div class="flex flex-col justify-center items-center content-center py-16">
+    <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
+        <div class="flex flex-row">
+            {{clientData_1_month|safe}}
+            {{clientDataLog_1_month|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{clientData_6_months|safe}}
+            {{clientDataLog_6_months|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{clientData_1_year|safe}}
+            {{clientDataLog_1_year|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{clientData_5_years|safe}}
+            {{clientDataLog_5_years|safe}}
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="flex flex-col justify-center items-center content-center py-16">
     <div class="flex flex-row justify-center items-center content-center gap-5">
         {% for i in dataTypes%}
@@ -335,7 +423,6 @@
                 all {{i}} data</button></a>
         {% endfor %}
     </div>
-</div>
 </div>
 
 {% endblock %}

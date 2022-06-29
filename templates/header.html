@@ -1,8 +1,14 @@
 <div class="m-2 text-white font-light shadow-white">
     {% if not index %}
     <div class="flex flex-row justify-between content-center items-center">
-        <a href="/"><h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1></a>
-        <a href="https://metrics.torproject.org/rs.html#details/{{fingerprint}}"><h2 class="text-lg drop-shadow font-medium border p-2 rounded-xl hover:bg-white hover:text-tdpurple  transition-all">View {{name}} on Metrics</h2></a>
+        <a href="/">
+            <h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1>
+        </a>
+        <a href="https://metrics.torproject.org/rs.html#details/{{fingerprint}}">
+            <h2
+                class="text-lg drop-shadow font-medium border p-2 rounded-xl hover:bg-white hover:text-tdpurple  transition-all">
+                View {{name}} on Metrics</h2>
+        </a>
     </div>
 
     {% elif not donate %}
@@ -11,13 +17,15 @@
         <h1 class="text-9xl drop-shadow">StatsForTor</h1>
         <h2 class="text-3xl drop-shadow">Advanced relay statistics for the Tor network</h2>
     </div>
-  
+
 
     {% else %}
 
     <div class="absolute">
         <div class="flex flex-row justify-between content-center items-center">
-            <a href="/"><h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1></a>
+            <a href="/">
+                <h1 class="text-5xl drop-shadow underline underline-offset-8">&nbsp;StatsForTor&nbsp;</h1>
+            </a>
         </div>
     </div>
 
