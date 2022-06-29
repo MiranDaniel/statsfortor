@@ -7,15 +7,14 @@ from django.core.cache import cache
 from django.shortcuts import  render
 
 from ..common import convert_size
-from ..plot import plotBandwidth, plotClients
+from ..plot import plotBandwidth, plotClients, plotUptime
 
 
-def bridgeHandler(request, name, details, bandwidth, clients):
+def bridgeHandler(request, name, details, bandwidth, clients, uptime):
     ctx = {
         "type_raw": "bridge",
         "name": details["bridges"][0]["nickname"],
         "fingerprint": details["bridges"][0]["hashed_fingerprint"],
-        "type": f"{', '.join(details['bridges'][0]['transports'])} bridge",
         "dataTypes": ["summary", "details", "uptime", "weights", "history"],
         "flags": details["bridges"][0].get("flags"),
         "flags_l": [i.lower() for i in details["bridges"][0].get("flags")],
@@ -46,22 +45,21 @@ def bridgeHandler(request, name, details, bandwidth, clients):
     else:
         ctx["blocklist"] = []
 
-    print("=== RENDERING START ===")
-
     found = False
-    for j in ["plotData_", "plotDataLog_", "clientData_", "clientDataLog_"]:
-        for i in ["1_month", "6_months", "1_year", "5_years"]:
-            check = f"{ctx['fingerprint']}|{j}{i}"
-            x = cache.get(check)
-            if x != None:
-                ctx[f"{j}{i}"] = x
-                found = True
+    #for j in ["plotData_", "plotDataLog_", "plotWeight_", "plotWeightLog_", "uptimeData_", "uptimeDataLog_"]:
+    #    for i in ["1_month", "6_months", "1_year", "5_years"]:
+    #        check = f"{ctx['fingerprint']}|{j}{i}"
+    #        x = cache.get(check)
+    #        if x != None:
+    #            ctx[f"{j}{i}"] = x
+    #            found = True
 
-    manager = multiprocessing.Manager()
-    return_dict = manager.dict()
-    jobs = []
+
 
     if not found:
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+        jobs = []
         for i in ["1_month", "6_months", "1_year", "5_years"]:
             if i not in bandwidth["bridges"][0]["read_history"]:
                 break
@@ -84,6 +82,13 @@ def bridgeHandler(request, name, details, bandwidth, clients):
                 i*ctx["read_factor"], True) for i in ctx["reads"]]
             ctx["clientsNice"] = [convert_size(
                 i*ctx["client_factor"], True) for i in ctx["clients"]]
+
+
+            ctx["uptime_"] = [x for x in uptime["bridges"]
+                                            [0]["uptime"][i]["values"] if x is not None]
+            ctx["uptime_"] = [x*100*uptime["bridges"][0]
+                                                 ["uptime"][i]["factor"] for x in ctx["uptime_"]]
+
 
             p = multiprocessing.Process(target=plotBandwidth, args=(
                 return_dict,
@@ -108,6 +113,25 @@ def bridgeHandler(request, name, details, bandwidth, clients):
             jobs.append(p)
             p.start()
 
+            p = multiprocessing.Process(target=plotUptime, args=(
+                return_dict,
+                ctx.get("uptime_"),
+                ctx.get("uptime_exit_"),
+                ctx.get("uptime_fast_"),
+                ctx.get("uptime_guard_"),
+                ctx.get("uptime_hsdir_"),
+                ctx.get("uptime_running_"),
+                ctx.get("uptime_stable_"),
+                ctx.get("uptime_stabledesc_"),
+                ctx.get("uptime_v2dir_"),
+                ctx.get("uptime_valid_"),
+                uptime["bridges"][0]["uptime"][i]["first"],
+                uptime["bridges"][0]["uptime"][i]["last"],
+                i
+            ))
+            jobs.append(p)
+            p.start()
+
         for proc in jobs:
             proc.join()
 
@@ -115,11 +139,5 @@ def bridgeHandler(request, name, details, bandwidth, clients):
             print(f"{ctx['fingerprint']}|{i}")
             cache.set(f"{ctx['fingerprint']}|{i}", return_dict[i], timeout=600)
             ctx[i] = return_dict[i]
-
-    print("=== RENDERING END ===")
-    if found:
-        print("=== USED CACHE ===")
-    else:
-        print("=== DIDNT USE CACHE === ")
 
     return render(request, "../templates/relay.html", context=ctx)

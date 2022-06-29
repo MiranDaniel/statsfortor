@@ -56,3 +56,14 @@
   - 6 months
   - 1 year
   - 5 years
+
+### Bridge information
+ 
+## Setup guide
+
+### Requirements:
+
+- Redis server on port 6379
+- `requirements.txt` installed
+
+

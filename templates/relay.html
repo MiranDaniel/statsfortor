@@ -364,6 +364,30 @@
         </div>
     </div>
 </div>
+<div class="flex flex-row justify-center items-center">
+    <hr class="w-2/3 mx-auto border-tpurple border-2">
+</div>
+<div class="flex flex-col justify-center items-center content-center py-16">
+    <div class="flex flex-col justify-center items-center content-center gap-5 w-screen">
+        <div class="flex flex-row">
+            {{uptimeData_1_month|safe}}
+            {{uptimeDataLog_1_month|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{uptimeData_6_months|safe}}
+            {{uptimeDataLog_6_months|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{uptimeData_1_year|safe}}
+            {{uptimeDataLog_1_year|safe}}
+        </div>
+        <div class="flex flex-row">
+            {{uptimeData_5_years|safe}}
+            {{uptimeDataLog_5_years|safe}}
+        </div>
+    </div>
+</div>
+
 {% if type_raw == "relay" %}
 <div class="flex flex-row justify-center items-center">
     <hr class="w-2/3 mx-auto border-tpurple border-2">
@@ -413,6 +437,8 @@
     </div>
 </div>
 {% endif %}
+
+
 
 <div class="flex flex-col justify-center items-center content-center py-16">
     <div class="flex flex-row justify-center items-center content-center gap-5">

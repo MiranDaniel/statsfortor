@@ -73,6 +73,12 @@ def node(request, name=""):
         print(f"{r.status_code=}")
         return r.json()
 
+    def _getUptime(name):
+        r = requests.get(
+            f"https://onionoo.torproject.org/uptime?search={prefix}{name}")
+        print(f"{r.status_code=}")
+        return r.json()
+
     details = _getDetails(name)
 
     def check(details):
@@ -82,11 +88,13 @@ def node(request, name=""):
         if len(details["relays"]) != 0:
             bandwidth = _getBandwidth(name)
             weights = _getWeights(name)
-            return relayHandler(request, name, details, bandwidth, weights), True
+            uptime = _getUptime(name)
+            return relayHandler(request, name, details, bandwidth, weights, uptime), True
         if len(details["bridges"]) != 0:
             bandwidth = _getBandwidth(name)
             clients = _getClients(name)
-            return bridgeHandler(request, name, details, bandwidth, clients), True
+            uptime = _getUptime(name)
+            return bridgeHandler(request, name, details, bandwidth, clients, uptime), True
 
     res = check(details)
     if res[-1] != True:

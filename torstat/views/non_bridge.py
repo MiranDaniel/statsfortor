@@ -6,10 +6,10 @@ from django.core.cache import cache
 from django.shortcuts import render
 
 from ..common import convert_size
-from ..plot import plotBandwidth, plotWeights
+from ..plot import plotBandwidth, plotWeights, plotUptime
 
 
-def relayHandler(request, name, details, bandwidth, weights):
+def relayHandler(request, name, details, bandwidth, weights, uptime):
     ctx = {
         "dataTypes": ["summary", "details", "uptime", "weights", "history"],
         "type_raw": "relay",
@@ -60,19 +60,18 @@ def relayHandler(request, name, details, bandwidth, weights):
     print("=== RENDERING START ===")
 
     found = False
-    for j in ["plotData_", "plotDataLog_", "plotWeight_", "plotWeightLog_"]:
-        for i in ["1_month", "6_months", "1_year", "5_years"]:
-            check = f"{ctx['fingerprint']}|{j}{i}"
-        x = cache.get(check)
-        if x != None:
-            ctx[f"{j}{i}"] = x
-            found = True
-
-    manager = multiprocessing.Manager()
-    return_dict = manager.dict()
-    jobs = []
+    #for j in ["plotData_", "plotDataLog_", "plotWeight_", "plotWeightLog_", "uptimeData_", "uptimeDataLog_"]:
+    #    for i in ["1_month", "6_months", "1_year", "5_years"]:
+    #        check = f"{ctx['fingerprint']}|{j}{i}"
+    #    x = cache.get(check)
+    #    if x != None:
+    #        ctx[f"{j}{i}"] = x
+    #        found = True
 
     if not found:
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+        jobs = []
         for i in ["1_month", "6_months", "1_year", "5_years"]:
             if i not in bandwidth["relays"][0]["read_history"]:
                 break
@@ -109,6 +108,27 @@ def relayHandler(request, name, details, bandwidth, weights):
             ctx["exit_probability_"] = [x*weights["relays"][0]
                                         ["exit_probability"][i]["factor"] for x in ctx["exit_probability_"]]
 
+            ht = {
+                "uptime_exit_": "Exit",
+                "uptime_fast_": "Fast",
+                "uptime_guard_": "Guard",
+                "uptime_hsdir_": "HSDir",
+                "uptime_running_": "Running",
+                "uptime_stable_": "Stable",
+                "uptime_stabledesc_": "StableDesc",
+                "uptime_valid_": "Valid"
+            }
+
+            for j in ht:
+                if ht[j] in uptime["relays"][0]["flags"]:
+                    ctx[j] = [x for x in uptime["relays"][0]["flags"][ht[j]][i]["values"] if x is not None]
+                    ctx[j] = [x*100*uptime["relays"][0]["flags"][ht[j]][i]["factor"] for x in ctx[j]]
+
+            ctx["uptime_"] = [x for x in uptime["relays"]
+                                            [0]["uptime"][i]["values"] if x is not None]
+            ctx["uptime_"] = [x*100*uptime["relays"][0]
+                                                 ["uptime"][i]["factor"] for x in ctx["uptime_"]]
+
             p = multiprocessing.Process(target=plotBandwidth, args=(
                 return_dict,
                 ctx["writesNice"],
@@ -135,6 +155,25 @@ def relayHandler(request, name, details, bandwidth, weights):
             jobs.append(p)
             p.start()
 
+            p = multiprocessing.Process(target=plotUptime, args=(
+                return_dict,
+                ctx.get("uptime_"),
+                ctx.get("uptime_exit_"),
+                ctx.get("uptime_fast_"),
+                ctx.get("uptime_guard_"),
+                ctx.get("uptime_hsdir_"),
+                ctx.get("uptime_running_"),
+                ctx.get("uptime_stable_"),
+                ctx.get("uptime_stabledesc_"),
+                ctx.get("uptime_v2dir_"),
+                ctx.get("uptime_valid_"),
+                uptime["relays"][0]["uptime"][i]["first"],
+                uptime["relays"][0]["uptime"][i]["last"],
+                i
+            ))
+            jobs.append(p)
+            p.start()
+
         for proc in jobs:
             proc.join()
 
@@ -143,11 +182,6 @@ def relayHandler(request, name, details, bandwidth, weights):
             cache.set(f"{ctx['fingerprint']}|{i}", return_dict[i], timeout=600)
             ctx[i] = return_dict[i]
 
-    print("=== RENDERING END ===")
-    if found:
-        print("=== USED CACHE ===")
-    else:
-        print("=== DIDNT USE CACHE === ")
     ctx["writeTotal"] = 0
     ctx["readTotal"] = 0
 
