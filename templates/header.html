@@ -11,11 +11,11 @@
         </a>
     </div>
 
-    {% elif not donate %}
+    {% elif not donate and not info %}
 
-    <div class="flex flex-col justify-center content-center items-center p-24">
-        <h1 class="text-9xl drop-shadow">StatsForTor</h1>
-        <h2 class="text-3xl drop-shadow">Advanced relay statistics for the Tor network</h2>
+    <div class="flex flex-col justify-center content-center items-center pt-12 pb-20 sm:p-24">
+        <h1 class="text-7xl sm:text-9xl drop-shadow">StatsForTor</h1>
+        <h2 class="text-xl sm:text-3xl drop-shadow">Advanced relay statistics for the Tor network</h2>
     </div>
 
 
@@ -29,10 +29,11 @@
         </div>
     </div>
 
-    <div class="flex flex-col justify-center content-center items-center p-24">
-        <h1 class="text-9xl drop-shadow">Donate</h1>
-        <h2 class="text-3xl drop-shadow">Help with the development and hosting of the project</h2>
+    <div class="flex flex-col justify-center content-center items-center p-24 gap-3">
+        <h1 class="text-9xl drop-shadow">{{title}}</h1>
+        <h2 class="text-3xl drop-shadow">{{subtitle}}</h2>
     </div>
+
 
     {% endif %}
 </div>

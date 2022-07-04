@@ -22,7 +22,9 @@ def index(request, name=""):
 def donate(request, name=""):
     ctx = {
         "index": True,
-        "donate": True
+        "donate": True,
+        "title": "Donate",
+        "subtitle": "Help with the development and hosting of the project"
     }
     return render(request, "../templates/donate.html", context=ctx)
 

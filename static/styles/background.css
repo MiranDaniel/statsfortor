@@ -14,12 +14,11 @@
 
     .header {
         background-image: url("/static/bg-mobile.svg");
-        background-repeat: no-repeat;
-        background-size: cover;
+        background-repeat:no-repeat;
+        background-size:cover;
         overflow: visible;
         padding-bottom: 500px;
         margin-bottom: -500px;
-
     }
 }
 

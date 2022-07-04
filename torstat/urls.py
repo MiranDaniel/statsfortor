@@ -30,6 +30,8 @@ urlpatterns = [
     path("exit/<str:name>", views.node, name="exit"),
     path("search/<str:name>", views.node, name="search"),
     path("search/", views.relayRaw, name="search"),
+    path("license/", views.license, name="license"),
+    path("LICENSE/", views.license, name="license"),
     path("", views.index, name="index"),
     path("donate/", views.donate, name="donate"),
 ]
